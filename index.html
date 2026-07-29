@@ -39,12 +39,10 @@
                 <div class="converter-body">
                     <!-- Section 1: From Currency -->
                     <div class="conversion-section">
-                        <div class="section-top">
-                            <span class="section-title">From Amount</span>
-                            <select id="from-currency" class="currency-select"></select>
-                        </div>
-                        <div class="section-bottom">
+                        <span class="section-title">From</span>
+                        <div class="section-row">
                             <input type="number" id="amount" value="100" min="0" step="any" placeholder="0.00">
+                            <select id="from-currency" class="currency-select"></select>
                         </div>
                     </div>
 
@@ -57,12 +55,10 @@
 
                     <!-- Section 2: To Currency -->
                     <div class="conversion-section">
-                        <div class="section-top">
-                            <span class="section-title">Converted To</span>
-                            <select id="to-currency" class="currency-select"></select>
-                        </div>
-                        <div class="section-bottom">
+                        <span class="section-title">To</span>
+                        <div class="section-row">
                             <input type="text" id="converted-amount" readonly placeholder="0.00">
+                            <select id="to-currency" class="currency-select"></select>
                         </div>
                     </div>
 
