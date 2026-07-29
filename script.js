@@ -1,248 +1,144 @@
-// API Endpoint (Free real-time exchange rates, no API key required)
 const API_URL = "https://open.er-api.com/v6/latest/USD";
 
-// DOM Elements
+let exchangeRates = {};
+let supportedCurrencies = {};
+
 const amountInput = document.getElementById("amount");
 const convertedInput = document.getElementById("converted-amount");
-const fromCurrencySelect = document.getElementById("from-currency");
-const toCurrencySelect = document.getElementById("to-currency");
+const fromSelect = document.getElementById("from-currency");
+const toSelect = document.getElementById("to-currency");
 const swapBtn = document.getElementById("swap-btn");
-const copyBtn = document.getElementById("copy-btn");
 const rateText = document.getElementById("rate-text");
 const lastUpdated = document.getElementById("last-updated");
 const connectionBanner = document.getElementById("connection-banner");
 const popularGrid = document.getElementById("popular-grid");
-const baseCurrencyLabel = document.getElementById("base-currency-label");
 const filterChips = document.querySelectorAll(".filter-chip");
+const baseCurrencyLabel = document.getElementById("base-currency-label");
+const copyBtn = document.getElementById("copy-btn");
 const toast = document.getElementById("toast");
 
-// Currency Flags and Descriptions Mapping
-const currencyData = {
-    USD: { name: "United States Dollar", flag: "🇺🇸" },
-    EUR: { name: "Euro", flag: "🇪🇺" },
-    GBP: { name: "British Pound", flag: "🇬🇧" },
-    IQD: { name: "Iraqi Dinar", flag: "🇮🇶" },
-    AED: { name: "UAE Dirham", flag: "🇦🇪" },
-    SAR: { name: "Saudi Riyal", flag: "🇸🇦" },
-    TRY: { name: "Turkish Lira", flag: "🇹🇷" },
-    JPY: { name: "Japanese Yen", flag: "🇯🇵" },
-    CNY: { name: "Chinese Yuan", flag: "🇨🇳" },
-    CAD: { name: "Canadian Dollar", flag: "🇨🇦" },
-    AUD: { name: "Australian Dollar", flag: "🇦🇺" },
-    CHF: { name: "Swiss Franc", flag: "🇨🇭" },
-    KWD: { name: "Kuwaiti Dinar", flag: "🇰🇼" },
-    QAR: { name: "Qatari Riyal", flag: "🇶🇦" },
-    BHD: { name: "Bahraini Dinar", flag: "🇧🇭" },
-    JOD: { name: "Jordanian Dinar", flag: "🇯🇴" },
-    EGP: { name: "Egyptian Pound", flag: "🇪🇬" },
-    INR: { name: "Indian Rupee", flag: "🇮🇳" },
-    SEK: { name: "Swedish Krona", flag: "🇸🇪" },
-    NZD: { name: "New Zealand Dollar", flag: "🇳🇿" }
-};
-
-let exchangeRates = {};
 let currentPopularBase = "USD";
 
-// Initialize Application
-async function initApp() {
-    setupEventListeners();
-    checkConnectivity();
-    await fetchExchangeRates();
-}
-
-// Fetch Exchange Rates with LocalStorage Fallback
-async function fetchExchangeRates() {
+async function fetchRates() {
     try {
         const response = await fetch(API_URL);
-        if (!response.ok) throw new Error("Failed to fetch rates");
         const data = await response.json();
-        
-        exchangeRates = data.rates;
-        
-        // Ensure IQD is present and fallback if needed
-        if (!exchangeRates.IQD) {
-            exchangeRates.IQD = 1310.0; // Standard fixed peg fallback
+        if (data && data.rates) {
+            exchangeRates = data.rates;
+            supportedCurrencies = Object.keys(exchangeRates);
+            populateSelects();
+            convert();
+            renderPopularRates(currentPopularBase);
+            
+            const date = new Date(data.time_last_update_unix * 1000);
+            lastUpdated.innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> Updated: ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+            connectionBanner.classList.add("hidden");
         }
-
-        // Cache rates locally
-        localStorage.setItem("cached_rates", JSON.stringify(exchangeRates));
-        localStorage.setItem("cached_time", data.time_last_update_utc || new Date().toUTCString());
-
-        updateLastUpdatedTime(data.time_last_update_utc || new Date());
-        populateDropdowns();
-        convertCurrency();
-        renderPopularRates();
     } catch (error) {
-        console.warn("API fetch failed, loading from cache...", error);
-        const cachedRates = localStorage.getItem("cached_rates");
-        const cachedTime = localStorage.getItem("cached_time");
-
-        if (cachedRates) {
-            exchangeRates = JSON.parse(cachedRates);
-            updateLastUpdatedTime(cachedTime || "Cached data");
-            populateDropdowns();
-            convertCurrency();
-            renderPopularRates();
-        } else {
-            lastUpdated.innerHTML = `<i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i> Failed to load rates`;
-        }
+        connectionBanner.classList.remove("hidden");
+        // استخدام بيانات افتراضية في حال انقطع النت
+        exchangeRates = { USD: 1, EUR: 0.92, IQD: 1310.42, GBP: 0.78, AED: 3.67 };
+        supportedCurrencies = Object.keys(exchangeRates);
+        populateSelects();
+        convert();
+        renderPopularRates(currentPopularBase);
     }
 }
 
-// Populate Currency Dropdowns
-function populateDropdowns() {
-    const currencies = Object.keys(exchangeRates).sort();
-    
-    // Remember current selections if any
-    const currentFrom = fromCurrencySelect.value || "USD";
-    const currentTo = toCurrencySelect.value || "IQD";
+function populateSelects() {
+    const currencies = Object.keys(exchangeRates);
+    const fromVal = fromSelect.value || "USD";
+    const toVal = toSelect.value || "IQD";
 
-    fromCurrencySelect.innerHTML = "";
-    toCurrencySelect.innerHTML = "";
+    fromSelect.innerHTML = "";
+    toSelect.innerHTML = "";
 
     currencies.forEach(currency => {
-        const flag = currencyData[currency]?.flag || "🏳️";
-        const optionText = `${flag} ${currency} - ${currencyData[currency]?.name || currency}`;
-
         const option1 = document.createElement("option");
         option1.value = currency;
-        option1.textContent = optionText;
+        option1.textContent = currency;
+        if (currency === fromVal) option1.selected = true;
+        fromSelect.appendChild(option1);
 
         const option2 = document.createElement("option");
         option2.value = currency;
-        option2.textContent = optionText;
-
-        fromCurrencySelect.appendChild(option1);
-        toCurrencySelect.appendChild(option2);
+        option2.textContent = currency;
+        if (currency === toVal) option2.selected = true;
+        toSelect.appendChild(option2);
     });
-
-    // Set defaults
-    fromCurrencySelect.value = currencies.includes(currentFrom) ? currentFrom : "USD";
-    toCurrencySelect.value = currencies.includes(currentTo) ? currentTo : "IQD";
 }
 
-// Convert Currency Logic
-function convertCurrency() {
-    const amount = parseFloat(amountInput.value) || 0;
-    const from = fromCurrencySelect.value;
-    const to = toCurrencySelect.value;
+function convert() {
+    const amount = parseFloat(amountInput.value);
+    const from = fromSelect.value;
+    const to = toSelect.value;
 
-    if (!exchangeRates[from] || !exchangeRates[to]) return;
+    if (isNaN(amount) || !exchangeRates[from] || !exchangeRates[to]) {
+        convertedInput.value = "";
+        rateText.textContent = "Enter a valid amount";
+        return;
+    }
 
-    // Convert through USD base
-    const amountInUSD = amount / exchangeRates[from];
-    const result = amountInUSD * exchangeRates[to];
+    const rateInUSD = amount / exchangeRates[from];
+    const result = rateInUSD * exchangeRates[to];
+    
+    convertedInput.value = result.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 
-    // Format output based on magnitude
-    const decimals = result < 1 ? 4 : 2;
-    convertedInput.value = result.toLocaleString('en-US', { 
-        minimumFractionDigits: decimals, 
-        maximumFractionDigits: decimals 
-    });
-
-    // Update single unit exchange rate info text
-    const unitRate = (1 / exchangeRates[from]) * exchangeRates[to];
-    const formattedUnitRate = unitRate < 1 ? unitRate.toFixed(4) : unitRate.toFixed(2);
-    rateText.innerHTML = `1 ${from} = <span>${formattedUnitRate} ${to}</span>`;
+    const singleRate = (1 / exchangeRates[from]) * exchangeRates[to];
+    rateText.textContent = `1 ${from} = ${singleRate.toFixed(4)} ${to}`;
 }
 
-// Render Popular Exchange Rates Grid
-function renderPopularRates() {
+function renderPopularRates(base) {
+    currentPopularBase = base;
+    baseCurrencyLabel.textContent = base;
     popularGrid.innerHTML = "";
-    baseCurrencyLabel.textContent = currentPopularBase;
 
-    const baseRate = exchangeRates[currentPopularBase];
-    if (!baseRate) return;
+    const baseRate = exchangeRates[base] || 1;
 
-    // Currencies to highlight in popular section
-    const popularCurrencies = ["USD", "EUR", "GBP", "IQD", "AED", "SAR", "TRY", "JPY", "CAD", "AUD", "CHF", "KWD"]
-        .filter(c => c !== currentPopularBase && exchangeRates[c]);
+    Object.keys(exchangeRates).forEach(currency => {
+        if (currency === base) return;
 
-    popularCurrencies.forEach(currency => {
-        const ratePerBase = exchangeRates[currency] / baseRate;
-        const formattedRate = ratePerBase < 1 ? ratePerBase.toFixed(4) : ratePerBase.toFixed(2);
-        const flag = currencyData[currency]?.flag || "🏳️";
-        const name = currencyData[currency]?.name || currency;
-
-        const card = document.createElement("div");
-        card.className = "popular-item";
-        card.innerHTML = `
+        const rate = (1 / baseRate) * exchangeRates[currency];
+        
+        const item = document.createElement("div");
+        item.className = "popular-item";
+        item.innerHTML = `
             <div class="popular-item-top">
-                <div class="currency-badge">
-                    <span class="currency-flag">${flag}</span>
-                    <span>${currency}</span>
-                </div>
-                <span class="popular-rate">${formattedRate}</span>
+                <span class="currency-badge">${currency}</span>
+                <span class="popular-rate">${rate > 10 ? rate.toFixed(2) : rate.toFixed(4)}</span>
             </div>
-            <span class="popular-name">${name}</span>
+            <span class="popular-name">Exchange rate</span>
         `;
-        popularGrid.appendChild(card);
+        popularGrid.appendChild(item);
     });
 }
 
-// Update Last Updated Timestamp
-function updateLastUpdatedTime(timeString) {
-    const date = new Date(timeString);
-    const timeFormatted = isNaN(date) ? timeString : date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    lastUpdated.innerHTML = `<i class="fa-solid fa-clock-rotate-left"></i> Updated: ${timeFormatted}`;
-}
+amountInput.addEventListener("input", convert);
+fromSelect.addEventListener("change", convert);
+toSelect.addEventListener("change", convert);
 
-// Event Listeners Setup
-function setupEventListeners() {
-    amountInput.addEventListener("input", convertCurrency);
-    fromCurrencySelect.addEventListener("change", convertCurrency);
-    toCurrencySelect.addEventListener("change", convertCurrency);
+swapBtn.addEventListener("click", () => {
+    const temp = fromSelect.value;
+    fromSelect.value = toSelect.value;
+    toSelect.value = temp;
+    convert();
+});
 
-    // Swap Currencies
-    swapBtn.addEventListener("click", () => {
-        const temp = fromCurrencySelect.value;
-        fromCurrencySelect.value = toCurrencySelect.value;
-        toCurrencySelect.value = temp;
-        convertCurrency();
+filterChips.forEach(chip => {
+    chip.addEventListener("click", () => {
+        filterChips.forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        renderPopularRates(chip.dataset.base);
     });
+});
 
-    // Copy Result
-    copyBtn.addEventListener("click", () => {
-        if (!convertedInput.value) return;
-        navigator.clipboard.writeText(convertedInput.value);
-        showToast();
-    });
-
-    // Popular Filter Chips
-    filterChips.forEach(chip => {
-        chip.addEventListener("click", (e) => {
-            filterChips.forEach(c => c.classList.remove("active"));
-            e.target.classList.add("active");
-            currentPopularBase = e.target.getAttribute("data-base");
-            renderPopularRates();
-        });
-    });
-
-    // Online/Offline Listeners
-    window.addEventListener("online", () => {
-        connectionBanner.classList.add("hidden");
-        fetchExchangeRates();
-    });
-
-    window.addEventListener("offline", () => {
-        connectionBanner.classList.remove("hidden");
-    });
-}
-
-// Show Toast Notification
-function showToast() {
+copyBtn.addEventListener("click", () => {
+    if (!convertedInput.value) return;
+    navigator.clipboard.writeText(convertedInput.value);
     toast.classList.add("show");
     setTimeout(() => {
         toast.classList.remove("show");
-    }, 2500);
-}
+    }, 2000);
+});
 
-// Check initial connection status
-function checkConnectivity() {
-    if (!navigator.onLine) {
-        connectionBanner.classList.remove("hidden");
-    }
-}
-
-// Run app on load
-document.addEventListener("DOMContentLoaded", initApp);
+fetchRates();
