@@ -156,32 +156,49 @@ body {
 .converter-body {
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 12px;
 }
 
-/* Conversion Sections (Stacked Layout for Maximum Clarity) */
+/* Conversion Sections (Side-by-side corrected & enhanced) */
 .conversion-section {
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid var(--card-border);
     border-radius: 16px;
-    padding: 18px 20px;
+    padding: 16px 20px;
     display: flex;
     flex-direction: column;
-    gap: 12px;
-}
-
-.section-top {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+    gap: 8px;
 }
 
 .section-title {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     color: var(--text-secondary);
     text-transform: uppercase;
     letter-spacing: 0.8px;
+}
+
+.section-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-row input {
+    width: 52%;
+    background: transparent;
+    border: none;
+    outline: none;
+    color: var(--text-primary);
+    font-size: 26px;
+    font-weight: 800;
+}
+
+.section-row input::-webkit-outer-spin-button,
+.section-row input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 .currency-select {
@@ -190,36 +207,16 @@ body {
     color: var(--text-primary);
     font-size: 14px;
     font-weight: 700;
-    padding: 10px 14px;
+    padding: 12px 14px;
     border-radius: 12px;
     outline: none;
     cursor: pointer;
+    width: 45%;
 }
 
 .currency-select option {
     background: #0f1624;
     color: var(--text-primary);
-}
-
-.section-bottom {
-    display: flex;
-    align-items: center;
-}
-
-.section-bottom input {
-    width: 100%;
-    background: transparent;
-    border: none;
-    outline: none;
-    color: var(--text-primary);
-    font-size: 34px;
-    font-weight: 800;
-}
-
-.section-bottom input::-webkit-outer-spin-button,
-.section-bottom input::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
 }
 
 .swap-container {
