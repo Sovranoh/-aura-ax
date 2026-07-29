@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AuraEx — Premium Currency Exchange</title>
+    <link rel="stylesheet" href="style.css">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <!-- Background Animated Gradient Glows -->
+    <div class="bg-glow bg-glow-1"></div>
+    <div class="bg-glow bg-glow-2"></div>
+
+    <!-- Internet Connection Status Banner -->
+    <div id="connection-banner" class="connection-banner hidden">
+        <i class="fa-solid fa-triangle-exclamation"></i> No internet connection. Using cached rates.
+    </div>
+
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="logo">
+                <div class="logo-icon"><i class="fa-solid fa-chart-line"></i></div>
+                <span class="logo-text">Aura<span class="gradient-text">Ex</span></span>
+            </div>
+            <div class="header-actions">
+                <div class="market-status">
+                    <span class="pulse-dot" id="market-pulse"></span>
+                    <span id="market-status-text">Market Live</span>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Converter Card -->
+            <section class="converter-card glass">
+                <div class="card-header">
+                    <h2>Currency Converter</h2>
+                    <span class="last-updated" id="last-updated"><i class="fa-solid fa-clock-rotate-left"></i> Syncing rates...</span>
+                </div>
+
+                <div class="converter-body">
+                    <!-- From Currency Group -->
+                    <div class="currency-group">
+                        <label for="amount">Amount</label>
+                        <div class="input-row">
+                            <input type="number" id="amount" value="100" min="0" step="any" placeholder="Enter amount">
+                            <div class="select-container">
+                                <select id="from-currency" class="currency-select"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Swap Button -->
+                    <div class="swap-container">
+                        <button id="swap-btn" class="swap-btn" title="Swap currencies">
+                            <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                        </button>
+                    </div>
+
+                    <!-- To Currency Group -->
+                    <div class="currency-group">
+                        <label for="converted-amount">Converted Amount</label>
+                        <div class="input-row">
+                            <input type="text" id="converted-amount" readonly placeholder="Result">
+                            <div class="select-container">
+                                <select id="to-currency" class="currency-select"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Metadata & Actions -->
+                    <div class="conversion-meta">
+                        <div class="rate-display">
+                            <i class="fa-solid fa-info-circle"></i>
+                            <span id="rate-text">Loading exchange rate...</span>
+                        </div>
+                        <button id="copy-btn" class="copy-btn">
+                            <i class="fa-regular fa-copy"></i> Copy Result
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Popular Exchange Rates Section -->
+            <section class="popular-section">
+                <div class="section-header">
+                    <h3><i class="fa-solid fa-fire text-gradient"></i> Market Rates (vs <span id="base-currency-label">USD</span>)</h3>
+                    <div class="popular-filter">
+                        <button class="filter-chip active" data-base="USD">USD</button>
+                        <button class="filter-chip" data-base="EUR">EUR</button>
+                        <button class="filter-chip" data-base="IQD">IQD</button>
+                    </div>
+                </div>
+                <div class="popular-grid" id="popular-grid">
+                    <!-- Dynamic Popular Cards will be inserted here -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>&copy; 2026 AuraEx Financial Services. Real-time institutional grade exchange rates.</p>
+        </footer>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast hidden">
+        <i class="fa-solid fa-circle-check"></i> Copied to clipboard!
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
