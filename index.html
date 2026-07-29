@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AuraEx — Currency Converter</title>
+    <title>AuraEx — Premium Currency Exchange</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -39,10 +39,12 @@
                 <div class="converter-body">
                     <!-- Section 1: From Currency -->
                     <div class="conversion-section">
-                        <span class="section-title">From</span>
-                        <div class="section-row">
-                            <input type="number" id="amount" value="100" min="0" step="any" placeholder="Amount">
+                        <div class="section-top">
+                            <span class="section-title">From Amount</span>
                             <select id="from-currency" class="currency-select"></select>
+                        </div>
+                        <div class="section-bottom">
+                            <input type="number" id="amount" value="100" min="0" step="any" placeholder="0.00">
                         </div>
                     </div>
 
@@ -55,10 +57,12 @@
 
                     <!-- Section 2: To Currency -->
                     <div class="conversion-section">
-                        <span class="section-title">To</span>
-                        <div class="section-row">
-                            <input type="text" id="converted-amount" readonly placeholder="Result">
+                        <div class="section-top">
+                            <span class="section-title">Converted To</span>
                             <select id="to-currency" class="currency-select"></select>
+                        </div>
+                        <div class="section-bottom">
+                            <input type="text" id="converted-amount" readonly placeholder="0.00">
                         </div>
                     </div>
 
@@ -69,7 +73,7 @@
                             <span id="rate-text">Loading rate...</span>
                         </div>
                         <button id="copy-btn" class="copy-btn">
-                            <i class="fa-regular fa-copy"></i> Copy
+                            <i class="fa-regular fa-copy"></i> Copy Result
                         </button>
                     </div>
                 </div>
